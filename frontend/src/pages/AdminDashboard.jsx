@@ -17,7 +17,9 @@ import {
   CheckCircle2, 
   XCircle,
   ShieldCheck,
-  ArrowUpRight
+  ArrowUpRight,
+  Calendar,
+  Truck
 } from 'lucide-react';
 import { activityLogger, ACTIVITY_TYPES } from '../services/activityLogger';
 
@@ -454,6 +456,18 @@ export default function AdminDashboard() {
                         {log.meta?.transactionId && (
                           <span className="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
                             Réf: {log.meta.transactionId}
+                          </span>
+                        )}
+                        {log.meta?.deliveryDate && (
+                          <span className="inline-flex items-center gap-1 font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                            <Calendar className="w-3 h-3 text-purple-600" />
+                            📅 Livr: {log.meta.deliveryDate} ({log.meta?.deliveryTime?.split(' ')[0] || ''})
+                          </span>
+                        )}
+                        {log.meta?.deliveryAddress && (
+                          <span className="inline-flex items-center gap-1 text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                            <Truck className="w-3 h-3 text-slate-500" />
+                            {log.meta.deliveryAddress}
                           </span>
                         )}
                       </div>

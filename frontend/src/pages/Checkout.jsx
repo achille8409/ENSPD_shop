@@ -11,7 +11,10 @@ import {
   ShoppingBag,
   AlertTriangle,
   RotateCcw,
-  Check
+  Check,
+  Calendar,
+  Clock,
+  Truck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
@@ -25,6 +28,13 @@ export default function Checkout() {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Helper pour les dates de livraison
+  const getFormattedDate = (offsetDays = 0) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().split('T')[0];
+  };
 
   // If redirected with direct buy or specific state
   const directProduct = location.state?.product;
@@ -40,6 +50,8 @@ export default function Checkout() {
   const [fullName, setFullName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [campusLocation, setCampusLocation] = useState('Foyer des Étudiants ENSPD (PK17)');
+  const [deliveryDate, setDeliveryDate] = useState(location.state?.deliveryDate || getFormattedDate(1));
+  const [deliveryTime, setDeliveryTime] = useState(location.state?.deliveryTime || '12h00 - 14h00 (Pause déjeuner)');
   const [notes, setNotes] = useState('');
 
   // UI Flow State
@@ -99,6 +111,9 @@ export default function Checkout() {
         fullName,
         email,
         deliveryAddress: campusLocation,
+        deliveryDate,
+        deliveryTime,
+        notes,
         items: checkoutItems
       });
 
@@ -108,18 +123,21 @@ export default function Checkout() {
         setIsUSSDModalOpen(false);
         clearCart();
 
-        // Enregistrer l'activité de Commande
+        // Enregistrer l'activité de Commande avec la Date et l'Heure de livraison
         activityLogger.logEvent(
           ACTIVITY_TYPES.ORDER,
           fullName || user?.name || 'Étudiant ENSPD',
           email || user?.email || 'Non renseigné',
           phone,
-          `Nouvelle commande #${response.orderId} pour ${calculatedTotal.toLocaleString('fr-FR')} FCFA (${campusLocation})`,
+          `Nouvelle commande #${response.orderId} pour ${calculatedTotal.toLocaleString('fr-FR')} FCFA (${campusLocation} - Prévu le ${deliveryDate} à ${deliveryTime})`,
           {
             orderId: response.orderId,
             total: calculatedTotal,
             items: checkoutItems.map(i => `${i.name} (x${i.quantity})`),
-            deliveryAddress: campusLocation
+            deliveryAddress: campusLocation,
+            deliveryDate,
+            deliveryTime,
+            notes
           }
         );
 
@@ -247,9 +265,17 @@ export default function Checkout() {
               <span className="text-slate-500 font-sans">Numéro de téléphone :</span>
               <span className="font-bold">+237 {transactionData.phone}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500 font-sans">Lieu de Retrait :</span>
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-slate-500 font-sans">Lieu de Retrait / Livraison :</span>
               <span className="font-bold font-sans text-slate-900">{campusLocation}</span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-slate-500 font-sans">Date de Livraison prévue :</span>
+              <span className="font-bold font-sans text-indigo-700">{deliveryDate}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500 font-sans">Créneau horaire souhaité :</span>
+              <span className="font-bold font-sans text-indigo-700">{deliveryTime}</span>
             </div>
           </div>
 
@@ -483,6 +509,96 @@ export default function Checkout() {
                     </select>
                   </div>
 
+                  {/* Date & Heure de livraison souhaitée */}
+                  <div className="pt-2 border-t border-slate-100 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Date &amp; Heure de Livraison / Retrait *</span>
+                      </label>
+                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                        Campus PK17
+                      </span>
+                    </div>
+
+                    {/* Quick date choices */}
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryDate(getFormattedDate(0))}
+                        className={`py-2 px-2 rounded-xl border font-bold transition text-center ${
+                          deliveryDate === getFormattedDate(0)
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        Aujourd'hui
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryDate(getFormattedDate(1))}
+                        className={`py-2 px-2 rounded-xl border font-bold transition text-center ${
+                          deliveryDate === getFormattedDate(1)
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        Demain
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryDate(getFormattedDate(2))}
+                        className={`py-2 px-2 rounded-xl border font-bold transition text-center ${
+                          deliveryDate === getFormattedDate(2)
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        Après-demain
+                      </button>
+                    </div>
+
+                    {/* Date and Time slots inputs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          Date choisie :
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="date"
+                            required
+                            min={getFormattedDate(0)}
+                            value={deliveryDate}
+                            onChange={(e) => setDeliveryDate(e.target.value)}
+                            className="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 cursor-pointer"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          Créneau horaire souhaité :
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={deliveryTime}
+                            onChange={(e) => setDeliveryTime(e.target.value)}
+                            className="w-full py-2.5 pl-8 pr-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 cursor-pointer"
+                          >
+                            <option value="08h00 - 10h00 (Matin / Début de cours)">08h00 - 10h00 (Matin / Début de cours)</option>
+                            <option value="10h00 - 12h00 (Pause de 10h)">10h00 - 12h00 (Pause de 10h)</option>
+                            <option value="12h00 - 14h00 (Pause déjeuner au foyer)">12h00 - 14h00 (Pause déjeuner au foyer)</option>
+                            <option value="14h00 - 16h00 (Après-midi / Séances TD)">14h00 - 16h00 (Après-midi / Séances TD)</option>
+                            <option value="16h00 - 18h00 (Fin des cours &amp; TP)">16h00 - 18h00 (Fin des cours &amp; TP)</option>
+                            <option value="18h00 - 20h00 (En soirée à la cité)">18h00 - 20h00 (En soirée à la cité)</option>
+                          </select>
+                          <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Special instructions */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -548,6 +664,24 @@ export default function Checkout() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Scheduled Delivery Info Card */}
+            <div className="bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-100/90 text-xs text-indigo-900 space-y-1.5">
+              <div className="font-extrabold flex items-center justify-between text-indigo-950">
+                <span className="flex items-center gap-1.5">
+                  <Truck className="w-3.5 h-3.5 text-indigo-600" />
+                  Livraison Programmée
+                </span>
+                <span className="text-[10px] font-bold bg-indigo-200/60 text-indigo-800 px-2 py-0.5 rounded-full">
+                  Campus PK17
+                </span>
+              </div>
+              <div className="text-[11px] text-indigo-800 space-y-0.5 pt-0.5">
+                <p><strong>📅 Date :</strong> {deliveryDate}</p>
+                <p><strong>⏰ Créneau :</strong> {deliveryTime}</p>
+                <p className="truncate"><strong>📍 Lieu :</strong> {campusLocation}</p>
+              </div>
             </div>
 
             {/* Price lines */}

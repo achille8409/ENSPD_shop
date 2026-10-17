@@ -76,6 +76,8 @@ CREATE TABLE `commandes` (
   `email_client` VARCHAR(150) NULL,
   `telephone_client` VARCHAR(30) NOT NULL,
   `adresse_livraison` VARCHAR(255) NOT NULL,
+  `date_livraison_souhaitee` DATE NULL,
+  `creneau_horaire_livraison` VARCHAR(100) NULL,
   `notes` TEXT NULL,
   `total_fcfa` INT UNSIGNED NOT NULL,
   `frais_livraison` INT UNSIGNED DEFAULT 0,

@@ -9,7 +9,9 @@ import {
   Tag, 
   ShieldCheck, 
   Truck, 
-  ArrowLeft 
+  ArrowLeft,
+  Calendar,
+  Clock
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -29,6 +31,16 @@ export default function Cart() {
 
   const [inputPromo, setInputPromo] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState('campus'); // 'campus' (0 FCFA) or 'home' (500 FCFA)
+  
+  // Fonctions d'aide pour les dates
+  const getFormattedDate = (offsetDays = 0) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().split('T')[0];
+  };
+
+  const [deliveryDate, setDeliveryDate] = useState(() => getFormattedDate(1)); // Par défaut demain
+  const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('12h00 - 14h00 (Pause déjeuner)');
   const navigate = useNavigate();
 
   const deliveryFee = deliveryMethod === 'campus' ? 0 : 500;
@@ -46,7 +58,9 @@ export default function Cart() {
       state: {
         deliveryMethod,
         deliveryFee,
-        finalTotal
+        finalTotal,
+        deliveryDate,
+        deliveryTime: deliveryTimeSlot
       }
     });
   };
@@ -262,6 +276,100 @@ export default function Cart() {
                 </div>
                 <span className="font-bold text-slate-900">500 FCFA</span>
               </label>
+            </div>
+          </div>
+
+          {/* Date & Heure de Livraison / Retrait */}
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Date &amp; Heure de Livraison</span>
+              </label>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Programmation
+              </span>
+            </div>
+
+            {/* Quick date selector buttons */}
+            <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setDeliveryDate(getFormattedDate(0))}
+                className={`py-1.5 px-2 rounded-xl border font-bold transition text-center ${
+                  deliveryDate === getFormattedDate(0)
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                Aujourd'hui
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeliveryDate(getFormattedDate(1))}
+                className={`py-1.5 px-2 rounded-xl border font-bold transition text-center ${
+                  deliveryDate === getFormattedDate(1)
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                Demain
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeliveryDate(getFormattedDate(2))}
+                className={`py-1.5 px-2 rounded-xl border font-bold transition text-center ${
+                  deliveryDate === getFormattedDate(2)
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                Après-demain
+              </button>
+            </div>
+
+            {/* Specific Date input */}
+            <div>
+              <span className="text-[10px] font-semibold text-slate-500 block mb-1">
+                Ou choisir une date spécifique :
+              </span>
+              <input
+                type="date"
+                min={getFormattedDate(0)}
+                value={deliveryDate}
+                onChange={(e) => setDeliveryDate(e.target.value)}
+                className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              />
+            </div>
+
+            {/* Time Slot input */}
+            <div>
+              <span className="text-[10px] font-semibold text-slate-500 block mb-1">
+                Créneau horaire souhaité sur le campus :
+              </span>
+              <div className="relative">
+                <select
+                  value={deliveryTimeSlot}
+                  onChange={(e) => setDeliveryTimeSlot(e.target.value)}
+                  className="w-full py-2.5 pl-8 pr-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                >
+                  <option value="08h00 - 10h00 (Matin / Début de cours)">08h00 - 10h00 (Matin / Début de cours)</option>
+                  <option value="10h00 - 12h00 (Pause de 10h)">10h00 - 12h00 (Pause de 10h)</option>
+                  <option value="12h00 - 14h00 (Pause déjeuner au foyer)">12h00 - 14h00 (Pause déjeuner au foyer)</option>
+                  <option value="14h00 - 16h00 (Après-midi / Séances TD)">14h00 - 16h00 (Après-midi / Séances TD)</option>
+                  <option value="16h00 - 18h00 (Fin des cours &amp; TP)">16h00 - 18h00 (Fin des cours &amp; TP)</option>
+                  <option value="18h00 - 20h00 (En soirée à la cité)">18h00 - 20h00 (En soirée à la cité)</option>
+                </select>
+                <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Recap pill */}
+            <div className="bg-indigo-50/80 rounded-xl p-2.5 border border-indigo-100 flex items-center gap-2 text-[11px] text-indigo-900">
+              <Truck className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <span>
+                Prévu le <strong>{deliveryDate}</strong> ({deliveryTimeSlot.split(' ')[0]} - {deliveryTimeSlot.split(' ')[2]})
+              </span>
             </div>
           </div>
 

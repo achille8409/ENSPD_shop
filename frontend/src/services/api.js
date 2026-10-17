@@ -180,7 +180,10 @@ export const apiService = {
     history.unshift({
       ...paymentRecord,
       items: paymentDetails.items || [],
-      deliveryAddress: paymentDetails.deliveryAddress || 'Campus ENSPD - PK17'
+      deliveryAddress: paymentDetails.deliveryAddress || 'Campus ENSPD - PK17',
+      deliveryDate: paymentDetails.deliveryDate || null,
+      deliveryTime: paymentDetails.deliveryTime || null,
+      notes: paymentDetails.notes || ''
     });
     localStorage.setItem('enspd_orders', JSON.stringify(history));
 

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { activityLogger, ACTIVITY_TYPES } from '../services/activityLogger';
 
 const CartContext = createContext();
 
@@ -20,6 +21,15 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('enspd_cart', JSON.stringify(cart));
   }, [cart]);
 
+  const getCurrentUser = () => {
+    try {
+      const saved = localStorage.getItem('enspd_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  };
+
   const showToast = (message, type = 'success') => {
     setToastMessage({ message, type, id: Date.now() });
     setTimeout(() => {
@@ -38,6 +48,23 @@ export const CartProvider = ({ children }) => {
         return [...prevCart, { ...product, quantity }];
       }
     });
+    // Activity tracking: who added what to cart
+    // Activity tracking: who added what to cart
+    activityLogger.logEvent(
+      ACTIVITY_TYPES.CART_ADD,
+      user?.name || 'Étudiant Connecté',
+      user?.email || 'Non renseigné',
+      user?.phone || 'Non renseigné',
+      `A ajouté ${quantity}x "${product.name}" (${(product.price * quantity).toLocaleString('fr-FR')} FCFA) à son panier`,
+      {
+        productId: product.id,
+        productName: product.name,
+        price: product.price,
+        quantity,
+        category: product.categoryName || product.category
+      }
+    );
+    showToast(`"${product.name}" a été ajouté au panier !`);
     showToast(`"${product.name}" a été ajouté au panier !`);
   };
 
@@ -57,6 +84,15 @@ export const CartProvider = ({ children }) => {
     const item = cart.find(i => i.id === productId);
     setCart(prevCart => prevCart.filter(item => item.id !== productId));
     if (item) {
+      const user = getCurrentUser();
+      activityLogger.logEvent(
+        ACTIVITY_TYPES.CART_REMOVE,
+        user?.name || 'Étudiant Connecté',
+        user?.email || 'Non renseigné',
+        user?.phone || 'Non renseigné',
+        `A retiré "${item.name}" du panier`,
+        { productId, productName: item.name }
+      );
       showToast(`"${item.name}" a été retiré du panier`, 'info');
     }
   };

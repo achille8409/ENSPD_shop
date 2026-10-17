@@ -29,7 +29,6 @@ class AuthController {
             return ['success' => false, 'message' => 'Mot de passe incorrect.'];
         }
 
-        // Generate token
         $token = bin2hex(random_bytes(32));
 
         unset($user['mot_de_passe']);

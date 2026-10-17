@@ -34,7 +34,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="font-medium">Boutique officielle ENSPD • Livraison rapide sur le Campus Ndogbong !</span>
+            <span className="font-medium">Boutique officielle ENSPD • Livraison rapide sur le Campus de PK17 !</span>
           </div>
           <div className="hidden sm:flex items-center gap-4 text-indigo-100">
             <span className="flex items-center gap-1">
@@ -44,7 +44,7 @@ export default function Navbar() {
             <span className="text-indigo-300">|</span>
             <span className="flex items-center gap-1">
               <Phone className="w-3.5 h-3.5 text-emerald-300" />
-              Support WhatsApp : +237 690 00 00 00
+              Support WhatsApp : +237 651 86 50 28
             </span>
           </div>
         </div>
@@ -124,8 +124,19 @@ export default function Navbar() {
             </NavLink>
           </nav>
 
-          {/* Right Actions: Cart, User Profile */}
-          <div className="flex items-center gap-3">
+          {/* Right Actions: Cart, User Profile & Admin Tracker */}
+          <div className="flex items-center gap-2.5">
+            {/* Admin / Activity Tracker button */}
+            <Link
+              to="/admin"
+              className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+              title="Tableau de bord : voir qui s'est connecté, qui a créé un compte, les paniers et les commandes"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              <span className="hidden sm:inline">Suivi Activités</span>
+              <span className="sm:hidden font-black text-[11px]">Admin 📊</span>
+            </Link>
+
             {/* Quick search button */}
             <Link 
               to="/produits" 
@@ -171,6 +182,15 @@ export default function Navbar() {
                       <p className="text-sm font-bold text-slate-800 truncate">{user?.name}</p>
                       <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                     </div>
+
+                    <Link
+                      to="/admin"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-amber-50 hover:text-amber-900 flex items-center gap-2 font-bold border-b border-slate-100"
+                    >
+                      <span>📊 Tableau de Bord &amp; Suivi</span>
+                    </Link>
+
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-medium"
@@ -227,6 +247,13 @@ export default function Navbar() {
             className="block px-3 py-2.5 rounded-xl font-semibold text-slate-800 hover:bg-indigo-50 hover:text-indigo-600"
           >
             Tous les Produits
+          </NavLink>
+          <NavLink
+            to="/admin"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2.5 rounded-xl font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200"
+          >
+            📊 Suivi Activités &amp; Commandes
           </NavLink>
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
             <Link

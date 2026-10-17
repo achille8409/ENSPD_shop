@@ -111,7 +111,7 @@ export const PRODUCTS = [
   },
   {
     id: 7,
-    name: "Gourde Isotherme Inox 750ml Campus Ndogbong",
+    name: "Gourde Isotherme Inox 750ml Campus PK17",
     category: "accessoires",
     categoryName: "Accessoires & Goodies",
     price: 6500,
@@ -219,7 +219,7 @@ export const TESTIMONIALS = [
     name: "Emmanuel Ndongo",
     department: "Génie Informatique & Télécoms - 4e année",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-    comment: "Livraison reçue en moins de 30 minutes au foyer des étudiants de Ndogbong ! Le paiement via MTN MoMo s'est fait instantanément, trop pratique entre deux cours.",
+    comment: "Livraison reçue en moins de 30 minutes au foyer des étudiants de PK17 ! Le paiement via MTN MoMo s'est fait instantanément, trop pratique entre deux cours.",
     rating: 5,
     date: "Il y a 2 jours"
   },

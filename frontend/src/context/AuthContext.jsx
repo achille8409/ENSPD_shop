@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiService } from '../services/api';
+import { activityLogger, ACTIVITY_TYPES } from '../services/activityLogger';
 
 const AuthContext = createContext();
 
@@ -33,6 +34,17 @@ export const AuthProvider = ({ children }) => {
       const res = await apiService.login(email, password);
       setUser(res.user);
       setToken(res.token);
+
+      // Log activity
+      activityLogger.logEvent(
+        ACTIVITY_TYPES.LOGIN,
+        res.user.name,
+        res.user.email,
+        res.user.phone,
+        `Connexion de l'étudiant (${res.user.department || 'Campus PK17'})`,
+        { department: res.user.department }
+      );
+
       return res;
     } finally {
       setLoading(false);
@@ -45,6 +57,17 @@ export const AuthProvider = ({ children }) => {
       const res = await apiService.register(userData);
       setUser(res.user);
       setToken(res.token);
+
+      // Log activity
+      activityLogger.logEvent(
+        ACTIVITY_TYPES.REGISTER,
+        res.user.name,
+        res.user.email,
+        res.user.phone,
+        `Nouveau compte étudiant créé (Filière: ${res.user.department || 'ENSPD PK17'})`,
+        { department: res.user.department }
+      );
+
       return res;
     } finally {
       setLoading(false);

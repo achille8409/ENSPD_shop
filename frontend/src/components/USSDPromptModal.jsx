@@ -63,7 +63,7 @@ export default function USSDPromptModal({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-center space-y-1">
                 <p className="text-xs text-slate-500 font-medium">Demande de débit initiée par :</p>
-                <p className="text-sm font-extrabold text-indigo-900">ENSPD SHOP - Ndogbong</p>
+                <p className="text-sm font-extrabold text-indigo-900">ENSPD SHOP - PK17</p>
                 <div className="pt-2 text-xl font-black text-slate-900">
                   {amount.toLocaleString('fr-FR')} <span className="text-xs font-bold text-slate-500">FCFA</span>
                 </div>

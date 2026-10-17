@@ -234,7 +234,7 @@ export default function Cart() {
                   />
                   <div>
                     <span className="font-bold text-slate-900 block">Retrait Campus ENSPD</span>
-                    <span className="text-[11px] text-slate-500">Au Foyer des Étudiants (Ndogbong)</span>
+                    <span className="text-[11px] text-slate-500">Au Foyer des Étudiants (PK17)</span>
                   </div>
                 </div>
                 <span className="font-black text-emerald-600">GRATUIT</span>
@@ -257,7 +257,7 @@ export default function Cart() {
                   />
                   <div>
                     <span className="font-bold text-slate-900 block">Livraison Résidence / Quartier</span>
-                    <span className="text-[11px] text-slate-500">Zone Ndogbong &amp; Cité universitaire</span>
+                    <span className="text-[11px] text-slate-500">Zone PK17 &amp; Cité universitaire</span>
                   </div>
                 </div>
                 <span className="font-bold text-slate-900">500 FCFA</span>

@@ -3,14 +3,26 @@
 -- Plateforme E-Commerce de l'École Nationale Supérieure Polytechnique de Douala
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS `enspd_shop` 
-CHARACTER SET utf8mb4 
+CREATE DATABASE IF NOT EXISTS `enspd_shop`
+CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
 USE `enspd_shop`;
 
--- 1. TABLE : utilisateurs
+-- Désactiver les contraintes pour permettre le nettoyage de la base
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Nettoyage préalable des tables dans l'ordre inverse des dépendances
+DROP TABLE IF EXISTS `paiements`;
+DROP TABLE IF EXISTS `lignes_commande`;
+DROP TABLE IF EXISTS `commandes`;
+DROP TABLE IF EXISTS `produits`;
+DROP TABLE IF EXISTS `categories`;
 DROP TABLE IF EXISTS `utilisateurs`;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 1. TABLE : utilisateurs
 CREATE TABLE `utilisateurs` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `nom` VARCHAR(150) NOT NULL,
@@ -25,7 +37,6 @@ CREATE TABLE `utilisateurs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. TABLE : categories
-DROP TABLE IF EXISTS `categories`;
 CREATE TABLE `categories` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `nom` VARCHAR(100) NOT NULL,
@@ -35,7 +46,6 @@ CREATE TABLE `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. TABLE : produits
-DROP TABLE IF EXISTS `produits`;
 CREATE TABLE `produits` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `categorie_id` INT UNSIGNED NOT NULL,
@@ -52,13 +62,12 @@ CREATE TABLE `produits` (
   `is_new` TINYINT(1) DEFAULT 0,
   `is_bestseller` TINYINT(1) DEFAULT 0,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`categorie_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_produits_categorie` FOREIGN KEY (`categorie_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
   INDEX `idx_categorie` (`categorie_id`),
-  INDEX `idx_slug` (`nom`)
+  INDEX `idx_nom` (`nom`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. TABLE : commandes
-DROP TABLE IF EXISTS `commandes`;
 CREATE TABLE `commandes` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `code_commande` VARCHAR(50) NOT NULL UNIQUE,
@@ -73,12 +82,11 @@ CREATE TABLE `commandes` (
   `code_promo` VARCHAR(50) NULL,
   `statut` ENUM('en_attente', 'payee', 'livree', 'annulee') DEFAULT 'en_attente',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_commandes_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL,
   INDEX `idx_code_commande` (`code_commande`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. TABLE : lignes_commande
-DROP TABLE IF EXISTS `lignes_commande`;
 CREATE TABLE `lignes_commande` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `commande_id` INT UNSIGNED NOT NULL,
@@ -87,12 +95,11 @@ CREATE TABLE `lignes_commande` (
   `prix_unitaire` INT UNSIGNED NOT NULL,
   `quantite` INT UNSIGNED NOT NULL DEFAULT 1,
   `sous_total` INT UNSIGNED NOT NULL,
-  FOREIGN KEY (`commande_id`) REFERENCES `commandes` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON DELETE SET NULL
+  CONSTRAINT `fk_lignes_commande_commande` FOREIGN KEY (`commande_id`) REFERENCES `commandes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_lignes_commande_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 6. TABLE : paiements
-DROP TABLE IF EXISTS `paiements`;
 CREATE TABLE `paiements` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `commande_id` INT UNSIGNED NOT NULL,
@@ -104,10 +111,9 @@ CREATE TABLE `paiements` (
   `code_reponse` VARCHAR(50) NULL,
   `raw_response` TEXT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`commande_id`) REFERENCES `commandes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_paiements_commande` FOREIGN KEY (`commande_id`) REFERENCES `commandes` (`id`) ON DELETE CASCADE,
   INDEX `idx_ref_trans` (`reference_transaction`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 -- ============================================================
 -- INSERTION DES DONNÉES INITIALES (SEEDS)
@@ -120,11 +126,11 @@ INSERT INTO `categories` (`id`, `nom`, `slug`, `icone`) VALUES
 (3, 'Parfums & Soins', 'parfums', 'Flame'),
 (4, 'Accessoires & Goodies', 'accessoires', 'ShoppingBag');
 
--- Utilisateurs de démonstration (Mots de passe hachés avec BCRYPT : 'Polytech2026!')
--- Hash généré pour 'Polytech2026!' : $2y$10$wN1F9f1J8M4bJqD1uQ1u.eqj2d0eN5D6O1w3B9R7k5U2wX4z6Y8Z.
+-- Utilisateurs de démonstration
+-- Les mots de passe sont enregistrés au format bcrypt pour une démonstration sécurisée.
 INSERT INTO `utilisateurs` (`id`, `nom`, `email`, `telephone`, `departement`, `mot_de_passe`, `role`) VALUES
-(1, 'Étudiant Polytech Démo', 'etudiant@enspd.cm', '677123456', 'Génie Informatique & Télécoms', '$2y$10$c1eFpG8gS4mN1hK4vI5VXeN4hJ8uX4rT7bJ7bI1uY6wX2z9Y8Z1a2', 'etudiant'),
-(2, 'Administrateur Boutique', 'admin@enspd.cm', '699001122', 'Administration ENSPD', '$2y$10$c1eFpG8gS4mN1hK4vI5VXeN4hJ8uX4rT7bJ7bI1uY6wX2z9Y8Z1a2', 'admin');
+(1, 'Étudiant Polytech Démo', 'etudiant@enspd.cm', '677123456', 'Génie Informatique & Télécoms', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oMha3vvC8/7t0ZB5JY3rM2G1E3rpy', 'etudiant'),
+(2, 'Administrateur Boutique', 'admin@enspd.cm', '699001122', 'Administration ENSPD', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oMha3vvC8/7t0ZB5JY3rM2G1E3rpy', 'admin');
 
 -- Produits réalistes ENSPD
 INSERT INTO `produits` (`id`, `categorie_id`, `nom`, `description`, `prix`, `prix_original`, `image_url`, `badge`, `badge_color`, `rating`, `reviews_count`, `stock`, `is_new`, `is_bestseller`) VALUES
@@ -134,7 +140,7 @@ INSERT INTO `produits` (`id`, `categorie_id`, `nom`, `description`, `prix`, `pri
 (4, 3, 'Eau de Parfum ''Polytech Fresh'' Intense 50ml', 'Notes boisées, agrumes et ambre. Sillage longue tenue 24h pour briller en présentation et sur le campus.', 9500, 12000, 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80', 'Nouveauté', 'bg-purple-600', 4.7, 19, 25, 1, 0),
 (5, 1, 'Écouteurs Sans Fil Lenovo LP40 Pro TWS', 'Bluetooth 5.3, basses profondes, réduction de bruit passive pour réviser à la bibliothèque universitaire.', 8000, 10000, 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=800&q=80', 'Top Vente', 'bg-cyan-600', 4.6, 44, 40, 0, 1),
 (6, 2, 'Box Friandises Campus Energy Pack', 'Assortiment étudiant : chocolats Mambo noir, biscuits gourmands, chips de plantain artisanales et bonbons menthe.', 4500, 5500, 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=800&q=80', 'Anti-Fatigue', 'bg-rose-500', 4.9, 61, 80, 1, 1),
-(7, 4, 'Gourde Isotherme Inox 750ml Campus Ndogbong', 'Garde votre eau fraîche pendant 24h sous la chaleur de Douala. Double paroi inox anti-fuite avec logo ENSPD.', 6500, 8000, 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80', 'Écolo', 'bg-teal-600', 4.8, 22, 50, 0, 0),
+(7, 4, 'Gourde Isotherme Inox 750ml Campus PK17', 'Garde votre eau fraîche pendant 24h sous la chaleur de Douala. Double paroi inox anti-fuite avec logo ENSPD.', 6500, 8000, 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80', 'Écolo', 'bg-teal-600', 4.8, 22, 50, 0, 0),
 (8, 1, 'Kit Starter Robotique Arduino Uno R3 ENSPD', 'Kit complet pour TP de Génie Électrique & Informatique : carte Uno R3, capteurs, servomoteur, écran LCD.', 24500, 28000, 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80', 'Projets Génie', 'bg-blue-700', 5.0, 31, 20, 1, 0),
 (9, 3, 'Brume Parfumée ''Campus Glow'' Vanille & Coco 100ml', 'Senteur douce, sucrée et rafraîchissante. Idéale après les cours ou le sport universitaire.', 6000, 7500, 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80', 'Tendances', 'bg-pink-500', 4.8, 27, 35, 1, 1),
 (10, 1, 'Clé USB SanDisk Ultra Flair 64GB USB 3.0', 'Corps métallique ultra résistant. Indispensable pour vos codes sources, rapports de stage et logiciels.', 5500, 7000, 'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&w=800&q=80', 'Transfert 150MB/s', 'bg-slate-700', 4.7, 33, 75, 0, 0),

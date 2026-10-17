@@ -8,9 +8,11 @@ import {
   ArrowRight, 
   Sparkles, 
   AlertCircle,
-  GraduationCap
+  GraduationCap,
+  Info
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -20,9 +22,13 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login } = useAuth();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
+  const redirectMessage = location.state?.redirectMessage;
+  const fromProduct = location.state?.fromProduct;
+  const isDirectBuy = location.state?.isDirectBuy;
   const from = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
@@ -37,6 +43,19 @@ export default function Login() {
     setIsSubmitting(true);
     try {
       await login(email, password);
+
+      // Si l'utilisateur voulait ajouter un produit avant d'être redirigé
+      if (fromProduct) {
+        addToCart(fromProduct, 1);
+        if (isDirectBuy) {
+          navigate('/paiement', { state: { directBuy: true, product: fromProduct }, replace: true });
+          return;
+        } else {
+          navigate('/panier', { replace: true });
+          return;
+        }
+      }
+
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || 'Identifiants incorrects. Veuillez réessayer.');
@@ -68,6 +87,22 @@ export default function Login() {
             Connectez-vous pour suivre vos commandes et acheter en un clic.
           </p>
         </div>
+
+        {/* Redirect notice if redirected from Cart button */}
+        {redirectMessage && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-2.5 shadow-sm animate-in fade-in">
+            <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p>{redirectMessage}</p>
+              <p className="text-[11px] text-amber-700 font-normal">
+                Si vous n'avez pas encore de compte,{' '}
+                <Link to="/register" state={location.state} className="font-extrabold underline hover:text-amber-900">
+                  créez votre compte ici
+                </Link>.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Login Form Container */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5">
@@ -161,7 +196,7 @@ export default function Login() {
           {/* Redirect to Register */}
           <div className="text-center pt-2 text-xs text-slate-500">
             Vous n'avez pas encore de compte ?{' '}
-            <Link to="/register" className="font-extrabold text-indigo-600 hover:underline">
+            <Link to="/register" state={location.state} className="font-extrabold text-indigo-600 hover:underline">
               Inscrivez-vous ici
             </Link>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -10,7 +10,8 @@ import {
   CheckCircle2, 
   AlertCircle, 
   ArrowRight,
-  GraduationCap
+  GraduationCap,
+  Info
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -30,13 +31,17 @@ export default function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register } = useAuth();
-  const { showToast } = useCart();
+  const { showToast, addToCart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const redirectMessage = location.state?.redirectMessage;
+  const fromProduct = location.state?.fromProduct;
+  const isDirectBuy = location.state?.isDirectBuy;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear field-specific error as user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -85,6 +90,18 @@ export default function Register() {
       });
 
       showToast('Votre compte étudiant a été créé avec succès !');
+
+      if (fromProduct) {
+        addToCart(fromProduct, 1);
+        if (isDirectBuy) {
+          navigate('/paiement', { state: { directBuy: true, product: fromProduct }, replace: true });
+          return;
+        } else {
+          navigate('/panier', { replace: true });
+          return;
+        }
+      }
+
       navigate('/');
     } catch (err) {
       setErrors({ server: err.message || "Erreur lors de l'inscription." });
@@ -111,6 +128,19 @@ export default function Register() {
             Rejoignez la boutique ENSPD et bénéficiez de réductions exclusives.
           </p>
         </div>
+
+        {/* Notice banner if redirected from cart/buy button */}
+        {redirectMessage && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-2.5 shadow-sm animate-in fade-in">
+            <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p>{redirectMessage}</p>
+              <p className="text-[11px] text-amber-700 font-normal">
+                Remplissez le formulaire ci-dessous pour créer votre profil en 1 minute.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Register Card */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5">
@@ -287,7 +317,7 @@ export default function Register() {
           {/* Redirect to Login */}
           <div className="text-center pt-2 text-xs text-slate-500">
             Vous avez déjà un compte ?{' '}
-            <Link to="/login" className="font-extrabold text-indigo-600 hover:underline">
+            <Link to="/login" state={location.state} className="font-extrabold text-indigo-600 hover:underline">
               Connectez-vous
             </Link>
           </div>

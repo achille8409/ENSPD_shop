@@ -37,4 +37,5 @@ class User {
         ]);
         return (int) $this->db->lastInsertId();
     }
+
 }

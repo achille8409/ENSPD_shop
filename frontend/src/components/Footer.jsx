@@ -82,9 +82,9 @@ export default function Footer() {
               Campus ENSPD
             </h4>
             <ul className="space-y-2.5 text-sm text-slate-400">
-              <li><span className="hover:text-white transition cursor-pointer">Point relais : Foyer des étudiants</span></li>
+              <li><span className="hover:text-white transition cursor-pointer">Point relais : Foyer des étudiants (PK17)</span></li>
               <li><span className="hover:text-white transition cursor-pointer">Livraison express en Amphi</span></li>
-              <li><span className="hover:text-white transition cursor-pointer">FAQ &amp; Retours</span></li>
+              <li><Link to="/admin" className="text-amber-400 font-bold hover:underline transition">📊 Suivi Activités &amp; Commandes</Link></li>
               <li><span className="hover:text-white transition cursor-pointer">Programme Ambassadeur Campus</span></li>
               <li><span className="hover:text-white transition cursor-pointer">BDE Polytechnique Douala</span></li>
             </ul>
@@ -111,11 +111,11 @@ export default function Footer() {
             <div className="pt-2 text-xs space-y-2 text-slate-400">
               <p className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
-                Campus de Ndogbong, Douala, Cameroun
+                Campus de PK17, Douala, Cameroun
               </p>
               <p className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                WhatsApp : +237 690 00 00 00
+                WhatsApp : +237 651 86 50 28
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-cyan-400 shrink-0" />

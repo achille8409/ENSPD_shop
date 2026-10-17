@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Sparkles, 
-  ArrowRight, 
+  ArrowRight,
   TrendingUp, 
   Flame, 
   ShieldCheck, 
@@ -105,7 +105,7 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="text-xl sm:text-2xl font-black text-slate-900">100%</div>
-                  <div className="text-xs text-slate-500 font-medium">Campus Ndogbong</div>
+                  <div className="text-xs text-slate-500 font-medium">Campus PK17</div>
                 </div>
                 <div>
                   <div className="text-xl sm:text-2xl font-black text-amber-600">0 FCFA</div>
@@ -394,7 +394,7 @@ export default function Home() {
               <div>
                 <h4 className="font-extrabold text-slate-900 text-base">Livraison Rapide Campus</h4>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Retrait gratuit au Foyer des Étudiants ou livraison en amphi à l'ENSPD Ndogbong.
+                  Retrait gratuit au Foyer des Étudiants ou livraison en amphi à l'ENSPD PK17.
                 </p>
               </div>
             </div>

@@ -43,7 +43,7 @@ class PaymentController {
                     'nom'             => $input['fullName'] ?? 'Étudiant Polytech',
                     'email'           => $input['email'] ?? null,
                     'phone'           => $phone,
-                    'adresse'         => $input['deliveryAddress'] ?? 'Campus ENSPD - Ndogbong',
+                    'adresse'         => $input['deliveryAddress'] ?? 'Campus ENSPD - PK17',
                     'notes'           => $input['notes'] ?? null,
                     'total'           => $amount,
                     'frais_livraison' => (int) ($input['deliveryFee'] ?? 0),

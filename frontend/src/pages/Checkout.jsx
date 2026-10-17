@@ -18,6 +18,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import USSDPromptModal from '../components/USSDPromptModal';
+import { activityLogger, ACTIVITY_TYPES } from '../services/activityLogger';
 
 export default function Checkout() {
   const { cart, totalAmount, clearCart } = useCart();
@@ -38,7 +39,7 @@ export default function Checkout() {
   const [phone, setPhone] = useState(user?.phone || '');
   const [fullName, setFullName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [campusLocation, setCampusLocation] = useState('Foyer des Étudiants ENSPD (Ndogbong)');
+  const [campusLocation, setCampusLocation] = useState('Foyer des Étudiants ENSPD (PK17)');
   const [notes, setNotes] = useState('');
 
   // UI Flow State
@@ -107,6 +108,37 @@ export default function Checkout() {
         setIsUSSDModalOpen(false);
         clearCart();
 
+        // Enregistrer l'activité de Commande
+        activityLogger.logEvent(
+          ACTIVITY_TYPES.ORDER,
+          fullName || user?.name || 'Étudiant ENSPD',
+          email || user?.email || 'Non renseigné',
+          phone,
+          `Nouvelle commande #${response.orderId} pour ${calculatedTotal.toLocaleString('fr-FR')} FCFA (${campusLocation})`,
+          {
+            orderId: response.orderId,
+            total: calculatedTotal,
+            items: checkoutItems.map(i => `${i.name} (x${i.quantity})`),
+            deliveryAddress: campusLocation
+          }
+        );
+
+        // Enregistrer l'activité de Paiement réussi
+        activityLogger.logEvent(
+          ACTIVITY_TYPES.PAYMENT_SUCCESS,
+          fullName || user?.name || 'Étudiant ENSPD',
+          email || user?.email || 'Non renseigné',
+          phone,
+          `Paiement de ${calculatedTotal.toLocaleString('fr-FR')} FCFA validé via ${operator === 'orange' ? 'Orange Money' : 'MTN Mobile Money'} (Réf: ${response.transactionId})`,
+          {
+            transactionId: response.transactionId,
+            orderId: response.orderId,
+            amount: calculatedTotal,
+            operator,
+            phone
+          }
+        );
+
         // Launch celebratory confetti
         confetti({
           particleCount: 120,
@@ -115,13 +147,39 @@ export default function Checkout() {
         });
       } else {
         setPaymentStatus('failed');
-        setErrorMessage(response?.message || "Le paiement a échoué. Veuillez vérifier votre solde ou votre code PIN.");
+        const failMsg = response?.message || "Le paiement a échoué. Veuillez vérifier votre solde ou votre code PIN.";
+        setErrorMessage(failMsg);
         setIsUSSDModalOpen(false);
+
+        // Enregistrer l'échec de paiement
+        activityLogger.logEvent(
+          ACTIVITY_TYPES.PAYMENT_FAILED,
+          fullName || user?.name || 'Étudiant ENSPD',
+          email || user?.email || 'Non renseigné',
+          phone,
+          `Échec du paiement Mobile Money de ${calculatedTotal.toLocaleString('fr-FR')} FCFA via ${operator === 'orange' ? 'Orange Money' : 'MTN MoMo'} (${failMsg})`,
+          {
+            amount: calculatedTotal,
+            operator,
+            phone,
+            reason: failMsg
+          }
+        );
       }
     } catch (err) {
       setPaymentStatus('failed');
-      setErrorMessage(err.message || "Erreur de communication avec la passerelle Mobile Money.");
+      const failMsg = err.message || "Erreur de communication avec la passerelle Mobile Money.";
+      setErrorMessage(failMsg);
       setIsUSSDModalOpen(false);
+
+      activityLogger.logEvent(
+        ACTIVITY_TYPES.PAYMENT_FAILED,
+        fullName || user?.name || 'Étudiant ENSPD',
+        email || user?.email || 'Non renseigné',
+        phone,
+        `Erreur réseau passerelle de paiement (${failMsg})`,
+        { amount: calculatedTotal, operator, phone }
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -417,11 +475,11 @@ export default function Checkout() {
                       onChange={(e) => setCampusLocation(e.target.value)}
                       className="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 cursor-pointer"
                     >
-                      <option value="Foyer des Étudiants ENSPD (Ndogbong)">Foyer des Étudiants ENSPD (Ndogbong) - Gratuit</option>
-                      <option value="Bloc Pédagogique - Hall Principal">Bloc Pédagogique - Hall Principal</option>
-                      <option value="Amphithéâtre 200 / Salle de cours">Amphithéâtre 200 / Salle de cours</option>
-                      <option value="Bibliothèque Universitaire">Bibliothèque Universitaire</option>
-                      <option value="Résidence / Cité Universitaire Ndogbong">Résidence / Cité Universitaire Ndogbong (+500 FCFA)</option>
+                      <option value="Foyer des Étudiants ENSPD (PK17)">Foyer des Étudiants ENSPD (PK17) - Gratuit</option>
+                      <option value="Bloc Pédagogique - Hall Principal (PK17)">Bloc Pédagogique - Hall Principal (PK17)</option>
+                      <option value="Amphithéâtre 200 / Salle de cours (PK17)">Amphithéâtre 200 / Salle de cours (PK17)</option>
+                      <option value="Bibliothèque Universitaire (PK17)">Bibliothèque Universitaire (PK17)</option>
+                      <option value="Résidence / Cité Universitaire PK17">Résidence / Cité Universitaire PK17 (+500 FCFA)</option>
                     </select>
                   </div>
 

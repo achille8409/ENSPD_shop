@@ -10,16 +10,17 @@ Conçue avec **React (Vite) + Tailwind CSS** côté client et une **API REST mod
 
 1. **Accueil (`/`)** :
    - Hero banner dynamique aux couleurs du campus et de Polytechnique.
-   - Micro-statistiques étudiantes (+1500 étudiants livrés, retrait gratuit au campus Ndogbong).
+   - Micro-statistiques étudiantes (+1500 étudiants livrés, retrait gratuit au Campus de PK17).
    - Rayons par catégories avec compteurs d'articles.
    - Section **« Nouveautés »** et **« Meilleures ventes »**.
    - Bannière code promo interactif (`ENSPD2026` pour -10% immédiat).
    - Témoignages et avis réels d'étudiants (Génie Informatique, Prépa, Génie Mécanique).
-   - Footer complet avec coordonnées de l'école et hotline WhatsApp.
+   - Footer complet avec coordonnées du Campus de PK17 et hotline WhatsApp (+237 651 86 50 28).
 
 2. **Connexion (`/login`)** :
    - Authentification sécurisée par email et mot de passe.
    - Bouton de test rapide avec compte démo étudiant (`etudiant@enspd.cm`).
+   - Redirection automatique vers le panier ou le paiement direct si l'utilisateur avait sélectionné un article avant de se connecter.
 
 3. **Inscription (`/register`)** :
    - Création de compte avec nom complet, email, numéro de téléphone, sélection de filière/département ENSPD, mot de passe et confirmation.
@@ -29,21 +30,31 @@ Conçue avec **React (Vite) + Tailwind CSS** côté client et une **API REST mod
    - Catégories filtrables dynamiques (Appareils électroniques, Friandises, Parfums, Accessoires).
    - **Barre de recherche interactive en temps réel** avec filtrage instantané sans rechargement.
    - Tri par prix croissant, décroissant, meilleure note ou nouveautés.
-   - Carte produit avec deux boutons dédiés : **« Ajouter au panier »** et **« Payer »** (achat direct).
+   - Carte produit avec deux boutons dédiés : **« Panier »** et **« Payer »**.
+   - **Protection d'accès :** si l'utilisateur n'est pas connecté, le clic sur « Panier » ou « Payer » ne valide pas l'action mais le redirige vers la connexion/inscription avec message d'information.
 
 5. **Panier (`/panier`)** :
    - Gestion des articles, ajustement des quantités (+/-) et suppression.
    - Calcul automatique du sous-total, application de code promotionnel étudiant.
-   - Choix du mode de livraison : Retrait Foyer des Étudiants (0 FCFA) ou Livraison Résidence (500 FCFA).
+   - Choix du mode de livraison : Retrait Foyer des Étudiants PK17 (0 FCFA) ou Livraison Résidence (500 FCFA).
    - Bouton d'action **« Passer au paiement »**.
 
 6. **Paiement en Ligne (`/paiement`)** :
    - Récapitulatif détaillé de la commande en FCFA.
    - Sélection entre **MTN Mobile Money** (*126#) et **Orange Money** (#150#).
    - Détection automatique de l'opérateur en fonction des préfixes camerounais (67x, 68x, 69x, etc.).
-   - Saisie du numéro et coordonnées de retrait sur le campus.
+   - Saisie du numéro et coordonnées de retrait au Campus de PK17.
    - **Simulation USSD interactive sur écran de smartphone** avec saisie du code PIN secret (Sandbox).
    - Écran de succès festif avec confettis, référence de transaction unique, impression de reçu et écran d'échec pour tester les cas d'erreur.
+
+7. **Tableau de Bord & Audit des Activités (`/admin`)** :
+   - Visualisation en temps réel :
+     - 🔐 Qui s'est connecté (date/heure, nom, email, département)
+     - 👤 Qui a créé un nouveau compte étudiant
+     - 🛒 Qui a mis quoi dans son panier (avec nom du produit, prix, quantité)
+     - 📦 Qui a commandé quoi (détail complet des articles et lieu de livraison)
+     - 💳 Qui a payé quel montant par MTN MoMo ou Orange Money (avec référence de transaction)
+   - Recherche instantanée et export JSON des logs d'audit.
 
 ---
 
@@ -129,9 +140,9 @@ ENSPD SHOP/
 1. Lancez **XAMPP** ou votre serveur MySQL et ouvrez **phpMyAdmin** (`http://localhost/phpmyadmin`).
 2. Créez une nouvelle base de données nommée `enspd_shop` (encodage `utf8mb4_unicode_ci`).
 3. Cliquez sur l'onglet **Importer** et sélectionnez le fichier :
-   ```
-   d:/ENSPD SHOP/backend/sql/schema.sql
-   ```
+```
+d:/ENSPD SHOP/backend/sql/schema.sql
+```
 4. Cliquez sur **Exécuter**. Toutes les tables (`utilisateurs`, `categories`, `produits`, `commandes`, `lignes_commande`, `paiements`) et les données de test sont automatiquement créées !
 
 ---

@@ -2,18 +2,47 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, Zap, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProductCard({ product }) {
-  const { addToCart } = useCart();
+  const { addToCart, showToast } = useCart();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+
+    // Redirection si l'utilisateur n'est pas connecté
+    if (!isAuthenticated) {
+      showToast("Veuillez vous connecter pour ajouter cet article à votre panier !", "info");
+      navigate('/login', {
+        state: {
+          fromProduct: product,
+          redirectMessage: "Veuillez vous connecter à votre compte étudiant (ou créer un compte) pour ajouter des articles au panier."
+        }
+      });
+      return;
+    }
+
     addToCart(product, 1);
   };
 
   const handleBuyNow = (e) => {
     e.stopPropagation();
+
+    // Redirection si l'utilisateur n'est pas connecté
+    if (!isAuthenticated) {
+      showToast("Veuillez vous connecter pour procéder au paiement !", "info");
+      navigate('/login', {
+        state: {
+          fromProduct: product,
+          isDirectBuy: true,
+          redirectMessage: "Veuillez vous connecter à votre compte étudiant pour passer commande et payer."
+        }
+      });
+      return;
+    }
+
     // Add product to cart and immediately proceed to checkout
     addToCart(product, 1);
     navigate('/paiement', { state: { directBuy: true, product } });
@@ -72,12 +101,12 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          {/* Under each product: TWO BUTTONS "Ajouter au panier" and "Payer" */}
+          {/* Under each product: TWO BUTTONS "Panier" and "Payer" */}
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={handleAddToCart}
               className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition duration-150 active:scale-95"
-              title="Ajouter au panier"
+              title="Ajouter au panier (Connexion requise)"
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
               <span>Panier</span>
@@ -86,7 +115,7 @@ export default function ProductCard({ product }) {
             <button
               onClick={handleBuyNow}
               className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 transition duration-150 active:scale-95"
-              title="Payer directement"
+              title="Payer directement (Connexion requise)"
             >
               <Zap className="w-3.5 h-3.5 shrink-0 fill-current" />
               <span>Payer</span>
